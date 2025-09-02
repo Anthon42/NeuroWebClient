@@ -1,0 +1,6 @@
+server:
+  port: 8080
+
+lmstudio:
+  api-url: http://localhost:1234/v1/chat/completions
+  model: llama.cpp

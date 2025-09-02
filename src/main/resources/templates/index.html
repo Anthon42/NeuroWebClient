@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Нейро-ассистент</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<div class="container">
+    <h1>🤖 Нейро-ассистент</h1>
+
+    <form th:action="@{/generate}" method="post">
+        <div class="form-group">
+            <label for="systemContext">Системный контекст:</label>
+            <textarea
+                    id="systemContext"
+                    name="systemContext"
+                    rows="3"
+                    cols="50"
+                    placeholder="Например: Ты эксперт по программированию на Java. Отвечай технически точно и кратко."
+            >[[${systemContext}]]</textarea>
+            <small>Описание контекста для модели (необязательно)</small>
+        </div>
+
+        <div class="form-group">
+            <label for="prompt">Введите ваш запрос:</label>
+            <textarea
+                    id="prompt"
+                    name="prompt"
+                    rows="4"
+                    cols="50"
+                    placeholder="Например: Почему небо синее?"
+                    required
+            >[[${prompt}]]</textarea>
+        </div>
+
+        <button type="submit">Генерировать ответ</button>
+    </form>
+
+    <div class="response-section">
+        <h2>Ответ:</h2>
+        <div class="response-box" id="responseBox">
+            <p th:text="${response}" style="white-space: pre-line;"></p>
+        </div>
+    </div>
+
+    <div class="api-info">
+        <h3>API Endpoint:</h3>
+        <p>POST /api/generate</p>
+        <p>Тело запроса (JSON):</p>
+        <pre>{"prompt": "ваш текст", "systemContext": "контекст"}</pre>
+    </div>
+</div>
+
+<script>
+    // Альтернативный способ через AJAX
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const prompt = document.getElementById('prompt').value;
+                const systemContext = document.getElementById('systemContext').value;
+                const responseBox = document.getElementById('responseBox');
+
+                // Показываем загрузку
+                responseBox.innerHTML = '<p>Генерация...</p>';
+
+                fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        systemContext: systemContext
+                    })
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        responseBox.innerHTML = '<p>' + data.replace(/\n/g, '<br>') + '</p>';
+                    })
+                    .catch(error => {
+                        responseBox.innerHTML = '<p style="color: red;">Ошибка: ' + error.message + '</p>';
+                    });
+            });
+        }
+    });
+</script>
+</body>
+</html>
